@@ -10,7 +10,7 @@ var server = app.listen(1138, function () {
 });
 
 var wss = new WebSocketServer({server: server});
-var diffSyncHandler = require('./server/diff-sync-handler');
+var diffSyncHandler = require('./lib/diff-sync-handler');
 
 
 
