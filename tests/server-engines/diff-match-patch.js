@@ -1,7 +1,7 @@
 var assert = require('assert'),
     uuid = require('node-uuid'),
     util = require('../../lib/utils'),
-    ServerSyncEngine = require('../../lib/server-engines/diff-match-patch');
+    ServerSyncEngine = require('../../lib/synchronizers/diff-match-patch');
 
 describe('Server Sync Engine Tests', function () {
     describe('Object Creation', function () {
