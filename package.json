@@ -28,6 +28,10 @@
   },
   "devDependencies": {
     "mocha": "^2.1.0",
-    "sinon": "^1.12.2"
+    "sinon": "^1.12.2",
+    "nsp": "*"
+  },
+  "scripts": {
+    "prepublish": "nsp audit-package"
   }
 }
