@@ -1,4 +1,8 @@
-## AeroGear Node.js Sync Server [![Build Status](https://travis-ci.org/aerogear/aerogear-nodejs-sync-server.png)](https://travis-ci.org/aerogear/aerogear-nodejs-sync-server)
+## AeroGear Node.js Sync Server 
+
+[![Build Status](https://api.travis-ci.org/aerogear/aerogear-nodejs-sync-server.svg?branch=master)](https://travis-ci.org/aerogear/aerogear-nodejs-sync-server)
+[![Coverage Status](https://coveralls.io/repos/github/aerogear/aerogear-nodejs-sync-server/badge.svg?branch=master)](https://coveralls.io/github/aerogear/aerogear-nodejs-sync-server?branch=master)
+
 This project in an implementation of Google's [Differential Synchonrization](http://research.google.com/pubs/pub35605.html) 
 by Neil Fraser, that can be used by AeroGear's client libraries.
 
@@ -26,7 +30,7 @@ building the first time, or if the dependencies in package.json have been update
 
 ### Starting the server
 
-    node index.js
+    $ npm start
 
 ## Documentation
 
@@ -38,6 +42,18 @@ For more details about the current release, please consult [our documentation](h
 * [Differential Synchronization step by step keynote presentation](https://www.icloud.com/iw/#keynote/BAKHgqmqd5ETPe9ebKyBhSINoBo1QHaNPYeF/diffsync)
 
 ## Development
+
+### Running tests
+
+    $ npm test
+
+To run a single test you can use:
+
+    $ node test/sync-engine-test.js | node_modules/tap-spec/bin/cmd.js
+
+### Running ESlint
+
+    $ npm run lint
 
 If you would like to help develop AeroGear you can join our [developer's mailing list](https://lists.jboss.org/mailman/listinfo/aerogear-dev), join #aerogear on Freenode, or shout at us on Twitter @aerogears.
 
