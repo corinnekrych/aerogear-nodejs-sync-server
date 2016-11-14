@@ -1,6 +1,6 @@
 {
   "name": "aerogear-nodejs-sync-server",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Node.js based server implementing the Differential Synchronization algorithm",
   "main": "index.js",
   "scripts": {
