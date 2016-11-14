@@ -60,6 +60,8 @@ If you are using Node 7.x you can use the `--inspect --debug-brk` command line o
     To start debugging, open the following URL in Chrome:
     chrome-devtools://devtools/remote/serve_file/@60cd6e859b9f557d2312f5bf532f6aec5f284980/inspector.html?experiments=true&v8only=true&ws=localhost:9229/9840e0cc-0603-47e1-a817-14989ab71f57
 
+> On previous version of Node, use [devtool](https://www.npmjs.com/package/devtool):
+> devtool test/sync-engine-test.js
 
 ### Running ESlint
 
