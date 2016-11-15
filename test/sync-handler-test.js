@@ -23,6 +23,22 @@ test('[sync-handler] messageReceived: undefined', function (t) {
   handler.messageReceived();
 });
 
+test('[sync-handler] messageReceived: unknown msgType', function (t) {
+  const handler = new SyncHandler(createSyncEngine());
+  const payload = {
+    id: uuid.v4(),
+    clientId: uuid.v4(),
+    msgType: 'bogus'
+  };
+  handler.on('error', function (error) {
+    const json = JSON.parse(error);
+    t.equal(json.msgType, 'error');
+    t.equal(json.content, 'Unknown msgType: bogus');
+    t.end();
+  });
+  handler.messageReceived(JSON.stringify(payload), {});
+});
+
 test('[sync-handler] messageRecieved: msgType subscribe', function (t) {
   const payload = {
     id: uuid.v4(),
@@ -44,7 +60,7 @@ test('[sync-handler] messageRecieved: msgType subscribe', function (t) {
     t.equal(json.edits[0].diffs[0].operation, 'UNCHANGED', 'operation should be UNCHANGED');
     t.end();
   });
-  handler.messageReceived(JSON.stringify(payload));
+  handler.messageReceived(JSON.stringify(payload), {});
 });
 
 test('[sync-handler] messageRecieved: msgType subscribe object content', function (t) {
@@ -95,6 +111,97 @@ test('[sync-handler] messageRecieved: msgType subscribe array content', function
     t.end();
   });
   handler.messageReceived(JSON.stringify(payload));
+});
+
+test('[sync-handler] clientClosed', function (t) {
+  const payload = {
+    id: uuid.v4(),
+    clientId: uuid.v4(),
+    msgType: 'subscribe',
+    content: 'stop calling me Shirley'
+  };
+  const handler = new SyncHandler(createSyncEngine());
+  handler.on('subscriberDeleted', function (subscriber) {
+    t.equal(subscriber.docId, payload.id, 'document id should match');
+    t.equal(subscriber.clientId, payload.clientId, 'client id should match');
+    t.ok(subscriber.client, 'client should exist');
+    t.end();
+  });
+  handler.on('subscriberAdded', function (patchMessage) {
+    const json = JSON.parse(patchMessage);
+    const subscriber = {
+      docId: json.id,
+      clientId: json.clientId,
+      client: {}
+    };
+    handler.clientClosed(subscriber);
+  });
+  handler.messageReceived(JSON.stringify(payload), {});
+});
+
+test('[sync-handler] detach', function (t) {
+  const payload = {
+    id: uuid.v4(),
+    clientId: uuid.v4(),
+    msgType: 'subscribe',
+    content: 'stop calling me Shirley'
+  };
+  const handler = new SyncHandler(createSyncEngine());
+  handler.on('detached', function (subscriber) {
+    t.equal(subscriber.docId, payload.id, 'document id should match');
+    t.equal(subscriber.clientId, payload.clientId, 'client id should match');
+    t.ok(subscriber.client, 'client should exist');
+    t.end();
+  });
+  handler.on('subscriberAdded', function (patchMessage) {
+    const json = JSON.parse(patchMessage);
+    const detach = {
+      docId: json.id,
+      clientId: json.clientId,
+      msgType: 'detach'
+    };
+    const subscriber = {
+      docId: json.id,
+      clientId: json.clientId,
+      client: {}
+    };
+    const client = { subscriber: subscriber };
+    handler.messageReceived(JSON.stringify(detach), client);
+  });
+  handler.messageReceived(JSON.stringify(payload), {});
+});
+
+test('[sync-handler] patch', function (t) {
+  const payload = {
+    id: uuid.v4(),
+    clientId: uuid.v4(),
+    msgType: 'subscribe',
+    content: 'stop calling me shirley'
+  };
+  const synchronizer = new DiffMatchPatchSynchronizer();
+  const dataStore = new InMemoryDataStore();
+  const syncEngine = new SyncEngine(synchronizer, dataStore);
+  const handler = new SyncHandler(syncEngine);
+  handler.on('subscriberAdded', function (patchMessage) {
+    var doc = dataStore.getDocument(payload.id)[0];
+    const shadow = {
+      id: doc.id,
+      clientId: doc.clientId,
+      clientVersion: 0,
+      serverVersion: 1,
+      content: 'stop calling me Shirley'
+    };
+    const edit = synchronizer.clientDiff(doc, shadow);
+    const patch = {
+      msgType: 'patch',
+      id: doc.id,
+      clientId: doc.clientId,
+      edits: [edit]
+    };
+    handler.messageReceived(JSON.stringify(patch), {});
+    t.end();
+  });
+  handler.messageReceived(JSON.stringify(payload), {});
 });
 
 function createSyncEngine () {
