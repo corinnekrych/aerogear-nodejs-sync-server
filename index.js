@@ -13,25 +13,55 @@ const DiffMatchPatchSynchronizer = require('./lib/synchronizers/diff-match-patch
 
 app.use(express.static('public'));
 
-const server = app.listen(7777, '0.0.0.0', function () {
-  console.log('Server UP at ' + server.address().port);
+const server = app.listen(7777, 'localhost', function () {
+  console.log('Server listening at ' + server.address().port);
 });
 
-const wss = new WebSocketServer({server: server, path: '/sync'});
+const ws = new WebSocketServer({server: server, path: '/sync'});
 const syncEngine = new SyncEngine(new DiffMatchPatchSynchronizer(),
                                   new InMemoryDataStore());
 const syncHandler = new SyncHandler(syncEngine);
+syncHandler.messageReceived.bind(syncHandler);
+syncHandler.clientClosed.bind(syncHandler);
 
-wss.on('connection', function (socket) {
-  console.log('Client Connected');
+syncHandler.on('subscriberAdded', function (patchMessage, subscriber) {
+  console.log('subscriber added.');
+  // store the subscriber with the current socket
+  subscriber.client.subscriber = subscriber;
+  subscriber.client.send(patchMessage);
+});
 
-  socket.on('message', syncHandler.messageReceived);
-
-  socket.on('close', function () {
-    console.log('Closing client connection');
+syncHandler.on('patched', function (patchMessage, subscribers) {
+  console.log('patch: notify all active subscribers');
+  subscribers.forEach(function (subscriber) {
+    subscriber.client.send(patchMessage);
   });
 });
 
-wss.on('error', function (error) {
+syncHandler.on('detached', function (message, client) {
+  console.log('detached: close websocket');
+  client.close();
+});
+
+syncHandler.on('error', function (errorMsg, client) {
+  console.log('error: ', errorMsg);
+  client.send(errorMsg);
+});
+
+ws.on('connection', function (socket) {
+  console.log('Client Connected');
+
+  socket.on('message', function (message) {
+    syncHandler.messageReceived(message, socket);
+  });
+
+  socket.on('close', function () {
+    console.log('Closing client connection');
+    syncHandler.clientClosed(socket.subscriber);
+  });
+});
+
+ws.on('error', function (error) {
   console.log('WS Server error', error);
 });
+

@@ -23,72 +23,75 @@ test('[sync-handler] messageReceived: undefined', function (t) {
   handler.messageReceived();
 });
 
-test('[sync-handler] messageRecieved: msgType add', function (t) {
+test('[sync-handler] messageRecieved: msgType subscribe', function (t) {
   const payload = {
     id: uuid.v4(),
     clientId: uuid.v4(),
-    msgType: 'add',
+    msgType: 'subscribe',
     content: 'stop calling me Shirley'
   };
   const handler = new SyncHandler(createSyncEngine());
-  handler.on('send', function (patchMessage) {
-    t.equal(patchMessage.msgType, 'patch', 'msgType should be patch');
-    t.equal(patchMessage.id, payload.id, 'id\'s should match');
-    t.equal(patchMessage.clientId, payload.clientId, 'clientId\'s should match');
-    t.equal(patchMessage.edits.length, 1, 'should be one edit');
-    t.equal(patchMessage.edits[0].serverVersion, 0, 'edit serverVersion should be 0');
-    t.equal(patchMessage.edits[0].clientVersion, 1, 'edit clientVersion should be 1');
-    t.equal(patchMessage.edits[0].checksum, undefined, 'TODO: implement checksum');
-    t.equal(patchMessage.edits[0].diffs.length, 1, 'edit should contain one diff');
-    t.equal(patchMessage.edits[0].diffs[0].operation, 'UNCHANGED', 'operation should be UNCHANGED');
+  handler.on('subscriberAdded', function (patchMessage) {
+    const json = JSON.parse(patchMessage);
+    t.equal(json.msgType, 'patch', 'msgType should be patch');
+    t.equal(json.id, payload.id, 'id\'s should match');
+    t.equal(json.clientId, payload.clientId, 'clientId\'s should match');
+    t.equal(json.edits.length, 1, 'should be one edit');
+    t.equal(json.edits[0].serverVersion, 0, 'edit serverVersion should be 0');
+    t.equal(json.edits[0].clientVersion, 1, 'edit clientVersion should be 1');
+    t.equal(json.edits[0].checksum, undefined, 'TODO: implement checksum');
+    t.equal(json.edits[0].diffs.length, 1, 'edit should contain one diff');
+    t.equal(json.edits[0].diffs[0].operation, 'UNCHANGED', 'operation should be UNCHANGED');
     t.end();
   });
   handler.messageReceived(JSON.stringify(payload));
 });
 
-test('[sync-handler] messageRecieved: msgType add object content', function (t) {
+test('[sync-handler] messageRecieved: msgType subscribe object content', function (t) {
   const payload = {
     id: uuid.v4(),
     clientId: uuid.v4(),
-    msgType: 'add',
+    msgType: 'subscribe',
     content: {
       name: 'Dr. Rosen'
     }
   };
   const handler = new SyncHandler(createSyncEngine());
-  handler.on('send', function (patchMessage) {
-    t.equal(patchMessage.msgType, 'patch', 'msgType should be patch');
-    t.equal(patchMessage.id, payload.id, 'id\'s should match');
-    t.equal(patchMessage.clientId, payload.clientId, 'clientId\'s should match');
-    t.equal(patchMessage.edits.length, 1, 'should be one edit');
-    t.equal(patchMessage.edits[0].serverVersion, 0, 'edit serverVersion should be 0');
-    t.equal(patchMessage.edits[0].clientVersion, 1, 'edit clientVersion should be 1');
-    t.equal(patchMessage.edits[0].checksum, undefined, 'TODO: implement checksum');
-    t.equal(patchMessage.edits[0].diffs.length, 1, 'edit should contain one diff');
-    t.equal(patchMessage.edits[0].diffs[0].operation, 'UNCHANGED', 'operation should be UNCHANGED');
+  handler.on('subscriberAdded', function (patchMessage) {
+    const json = JSON.parse(patchMessage);
+    t.equal(json.msgType, 'patch', 'msgType should be patch');
+    t.equal(json.id, payload.id, 'id\'s should match');
+    t.equal(json.clientId, payload.clientId, 'clientId\'s should match');
+    t.equal(json.edits.length, 1, 'should be one edit');
+    t.equal(json.edits[0].serverVersion, 0, 'edit serverVersion should be 0');
+    t.equal(json.edits[0].clientVersion, 1, 'edit clientVersion should be 1');
+    t.equal(json.edits[0].checksum, undefined, 'TODO: implement checksum');
+    t.equal(json.edits[0].diffs.length, 1, 'edit should contain one diff');
+    t.equal(json.edits[0].diffs[0].operation, 'UNCHANGED', 'operation should be UNCHANGED');
     t.end();
   });
   handler.messageReceived(JSON.stringify(payload));
 });
 
-test('[sync-handler] messageRecieved: msgType add array content', function (t) {
+test('[sync-handler] messageRecieved: msgType subscribe array content', function (t) {
   const payload = {
     id: uuid.v4(),
     clientId: uuid.v4(),
-    msgType: 'add',
+    msgType: 'subscribe',
     content: ['one', 'two', 'three']
   };
   const handler = new SyncHandler(createSyncEngine());
-  handler.on('send', function (patchMessage) {
-    t.equal(patchMessage.msgType, 'patch', 'msgType should be patch');
-    t.equal(patchMessage.id, payload.id, 'id\'s should match');
-    t.equal(patchMessage.clientId, payload.clientId, 'clientId\'s should match');
-    t.equal(patchMessage.edits.length, 1, 'should be one edit');
-    t.equal(patchMessage.edits[0].serverVersion, 0, 'edit serverVersion should be 0');
-    t.equal(patchMessage.edits[0].clientVersion, 1, 'edit clientVersion should be 1');
-    t.equal(patchMessage.edits[0].checksum, undefined, 'TODO: implement checksum');
-    t.equal(patchMessage.edits[0].diffs.length, 1, 'edit should contain one diff');
-    t.equal(patchMessage.edits[0].diffs[0].operation, 'UNCHANGED', 'operation should be UNCHANGED');
+  handler.on('subscriberAdded', function (patchMessage) {
+    const json = JSON.parse(patchMessage);
+    t.equal(json.msgType, 'patch', 'msgType should be patch');
+    t.equal(json.id, payload.id, 'id\'s should match');
+    t.equal(json.clientId, payload.clientId, 'clientId\'s should match');
+    t.equal(json.edits.length, 1, 'should be one edit');
+    t.equal(json.edits[0].serverVersion, 0, 'edit serverVersion should be 0');
+    t.equal(json.edits[0].clientVersion, 1, 'edit clientVersion should be 1');
+    t.equal(json.edits[0].checksum, undefined, 'TODO: implement checksum');
+    t.equal(json.edits[0].diffs.length, 1, 'edit should contain one diff');
+    t.equal(json.edits[0].diffs[0].operation, 'UNCHANGED', 'operation should be UNCHANGED');
     t.end();
   });
   handler.messageReceived(JSON.stringify(payload));

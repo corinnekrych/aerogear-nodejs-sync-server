@@ -16,7 +16,7 @@ test('[server-sync-engine] create new SyncEngine', function (t) {
 
 test('[server-sync-engine] addDocument empty content', function (t) {
   const syncEngine = new SyncEngine(new DiffMatchPatchSynchronizer(),
-                                              new InMemoryDataStore());
+                                    new InMemoryDataStore());
   const clientId = uuid.v4();
   const doc = {
     id: '1234'
@@ -30,7 +30,7 @@ test('[server-sync-engine] addDocument empty content', function (t) {
 
 test('[server-sync-engine] addDocument', function (t) {
   const syncEngine = new SyncEngine(new DiffMatchPatchSynchronizer(),
-                                        new InMemoryDataStore());
+                                    new InMemoryDataStore());
   const clientId = uuid.v4();
   const doc = {
     id: '1234',
