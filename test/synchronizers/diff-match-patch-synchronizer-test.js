@@ -94,7 +94,7 @@ test('[diff-match-patch synchronizer] patchShadow', function (t) {
   };
 
   const edit = synchronizer.clientDiff(doc, updatedDoc);
-  patchedShadow = synchronizer.patchShadow(edit.diffs, shadow);
+  patchedShadow = synchronizer.patchShadow(edit, shadow);
   t.equal(patchedShadow.content, 'Cool Dude', 'shadow test should be Cool Dude');
 
   t.end();

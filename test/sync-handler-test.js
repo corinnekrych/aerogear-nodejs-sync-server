@@ -183,7 +183,7 @@ test('[sync-handler] patch', function (t) {
   const syncEngine = new SyncEngine(synchronizer, dataStore);
   const handler = new SyncHandler(syncEngine);
   handler.on('subscriberAdded', function (patchMessage) {
-    var doc = dataStore.getDocument(payload.id)[0];
+    var doc = dataStore.getDocument(payload.id);
     const shadow = {
       id: doc.id,
       clientId: doc.clientId,
@@ -199,6 +199,7 @@ test('[sync-handler] patch', function (t) {
       edits: [edit]
     };
     handler.messageReceived(JSON.stringify(patch), {});
+
     t.end();
   });
   handler.messageReceived(JSON.stringify(payload), {});

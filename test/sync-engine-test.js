@@ -108,3 +108,32 @@ test('[server-sync-engine] diff', function (t) {
   t.equal(edit.diffs[0].operation, 'UNCHANGED');
   t.end();
 });
+
+test('[server-sync-engine] patch', function (t) {
+  const synchronizer = new DiffMatchPatchSynchronizer();
+  const syncEngine = new SyncEngine(synchronizer, new InMemoryDataStore());
+  const clientId = uuid.v4();
+  const doc = {
+    id: '1234',
+    content: 'stop calling me shirley'
+  };
+  syncEngine.addDocument(doc, clientId);
+  const shadow = {
+    id: doc.id,
+    clientId: doc.clientId,
+    clientVersion: 0,
+    serverVersion: 0,
+    content: 'stop calling me Shirley'
+  };
+  const edit = synchronizer.clientDiff(doc, shadow);
+  const patchMessage = {
+    msgType: 'patch',
+    id: doc.id,
+    clientId: doc.clientId,
+    edits: [edit]
+  };
+  syncEngine.patch(patchMessage);
+  const patched = syncEngine.getDocument(doc.id);
+  t.equal(patched.content, 'stop calling me Shirley');
+  t.end();
+});
