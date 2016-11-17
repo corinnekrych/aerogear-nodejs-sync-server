@@ -226,3 +226,36 @@ test('[server-sync-engine] patch but server already has the client version', fun
   t.equal(datastore.getEdits(doc.id, clientId).length, 0);
   t.end();
 });
+
+test('[server-sync-engine] restore backup when client hold old serverVersion', function (t) {
+  const synchronizer = new DiffMatchPatchSynchronizer();
+  const syncEngine = new SyncEngine(synchronizer, new InMemoryDataStore());
+  const clientId = uuid.v4();
+  const doc = {
+    id: '1234',
+    content: 'stop calling me shirley',
+    clientVersion: 2,
+    serverVersion: 2
+  };
+  syncEngine.addDocument(doc, clientId);
+  // simulate inconsistent state, backup still on "old" serverVersion
+  syncEngine.getBackup(doc.id).version = 1;
+  const shadow = {
+    id: doc.id,
+    clientId: doc.clientId,
+    clientVersion: 1,
+    serverVersion: 1,
+    content: 'stop calling me Shirley'
+  };
+  const edit = synchronizer.clientDiff(doc, shadow);
+  const patchMessage = {
+    msgType: 'patch',
+    id: doc.id,
+    clientId: doc.clientId,
+    edits: [edit]
+  };
+  syncEngine.patch(patchMessage);
+  const patched = syncEngine.getDocument(doc.id);
+  t.equal(patched.content, 'stop calling me Shirley');
+  t.end();
+});
