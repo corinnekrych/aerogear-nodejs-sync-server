@@ -196,7 +196,8 @@ test('[server-sync-engine] patch', function (t) {
 
 test('[server-sync-engine] patch but server already has the client version', function (t) {
   const synchronizer = new DiffMatchPatchSynchronizer();
-  const syncEngine = new SyncEngine(synchronizer, new InMemoryDataStore());
+  const datastore = new InMemoryDataStore();
+  const syncEngine = new SyncEngine(synchronizer, datastore);
   const clientId = uuid.v4();
   const doc = {
     id: '1234',
@@ -218,7 +219,10 @@ test('[server-sync-engine] patch but server already has the client version', fun
     edits: [edit]
   };
   syncEngine.patch(patchMessage);
+  // call again with the same patch message
+  syncEngine.patch(patchMessage);
   const patched = syncEngine.getDocument(doc.id);
   t.equal(patched.content, 'stop calling me Shirley');
+  t.equal(datastore.getEdits(doc.id, clientId).length, 0);
   t.end();
 });
