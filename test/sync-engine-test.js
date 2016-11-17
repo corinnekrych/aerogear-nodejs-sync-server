@@ -46,6 +46,54 @@ test('[server-sync-engine] addDocument', function (t) {
   t.end();
 });
 
+test('[server-sync-engine] addDocument multiple times verify seeded', function (t) {
+  const syncEngine = new SyncEngine(new DiffMatchPatchSynchronizer(),
+                                    new InMemoryDataStore());
+  const clientId = uuid.v4();
+  const doc = {
+    id: '1234',
+    content: 'A long time ago in a galaxy far, far away....'
+  };
+  syncEngine.addDocument(doc, clientId);
+  const patchMessage = syncEngine.addDocument(doc, 'client2');
+  t.equal(patchMessage.edits.length, 1, 'should be one edit');
+  t.equal(patchMessage.edits[0].clientVersion, -1, 'client version should be -1');
+  t.equal(patchMessage.edits[0].serverVersion, 1, 'server version should be 1');
+  t.equal(patchMessage.edits[0].diffs[0].operation, 'UNCHANGED', 'should be an \'UNCHANGED\' operation');
+  t.equal(patchMessage.edits[0].diffs[0].text, doc.content, 'content should be unchanged');
+  t.equal(patchMessage.clientId, 'client2', 'client id should match');
+
+  t.end();
+});
+
+/**
+ * Calling addDocument with the document id of an already existing document, allows
+ * for clients to "attach" to a current document without having to provide an empty
+ * document content when using subscribe.
+ */
+test('[server-sync-engine] addDocument twice second time without content', function (t) {
+  const syncEngine = new SyncEngine(new DiffMatchPatchSynchronizer(),
+                                    new InMemoryDataStore());
+  const clientId = uuid.v4();
+  const doc = {
+    id: '1234',
+    content: 'A long time ago in a galaxy far, far away....'
+  };
+  syncEngine.addDocument(doc, clientId);
+  const noContent = {
+    id: '1234'
+  };
+  const patchMessage = syncEngine.addDocument(noContent, 'client2');
+  t.equal(patchMessage.edits.length, 1, 'should be one edit');
+  t.equal(patchMessage.edits[0].clientVersion, -1, 'client version should be -1');
+  t.equal(patchMessage.edits[0].serverVersion, 1, 'server version should be 1');
+  t.equal(patchMessage.edits[0].diffs[0].operation, 'UNCHANGED', 'should be an \'UNCHANGED\' operation');
+  t.equal(patchMessage.edits[0].diffs[0].text, doc.content, 'content should be unchanged');
+  t.equal(patchMessage.clientId, 'client2', 'client id should match');
+
+  t.end();
+});
+
 test('[server-sync-engine] addDocument empty content but document already exists', function (t) {
   const synchronizer = new DiffMatchPatchSynchronizer();
   const syncEngine = new SyncEngine(synchronizer, new InMemoryDataStore());
