@@ -141,9 +141,9 @@ test('[server-sync-engine] verify shadow', function (t) {
   t.equal(shadow.clientVersion, 0, 'client version should be 0');
   t.equal(shadow.content, doc.content, 'content should be the same');
 
-  //const shadowBackup = syncEngine.getBackup(doc.id);
-  //t.equal(shadowBackup.version, shadow.serverVersion, 'backup version should be 0');
-  //t.equal(shadowBackup.content, doc.content, 'content should be the same');
+  const backup = syncEngine.getBackup(shadow.id);
+  t.equal(backup.version, shadow.serverVersion, 'backup version should be 0');
+  t.deepEqual(backup.content, shadow, 'content should be the same');
   t.end();
 });
 
