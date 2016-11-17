@@ -80,7 +80,7 @@ test('[server-sync-engine] verify shadow', function (t) {
   syncEngine.addDocument(doc, clientId);
   const shadow = syncEngine.getShadow(doc.id, clientId);
   t.equal(shadow.id, doc.id, 'id\'s should be the same');
-  t.equal(shadow.clientId, doc.clientId, 'clientId\'s should be the same');
+  t.equal(shadow.clientId, shadow.clientId, 'clientId\'s should be the same');
   t.equal(shadow.serverVersion, 0, 'server version should be 0');
   t.equal(shadow.clientVersion, 0, 'client version should be 0');
   t.equal(shadow.content, doc.content, 'content should be the same');
