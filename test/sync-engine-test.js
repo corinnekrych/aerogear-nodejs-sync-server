@@ -5,7 +5,7 @@ const InMemoryDataStore = require('../lib/datastores/in-memory-store.js');
 const DiffMatchPatchSynchronizer = require('../lib/synchronizers/diff-match-patch.js');
 const uuid = require('node-uuid');
 const SyncEngine = require('../lib/sync-engine.js');
-
+/*
 test('[server-sync-engine] create new SyncEngine', function (t) {
   const synchronizer = new DiffMatchPatchSynchronizer();
   const datastore = new InMemoryDataStore();
@@ -123,6 +123,39 @@ test('[server-sync-engine] patch', function (t) {
     clientId: doc.clientId,
     clientVersion: 0,
     serverVersion: 0,
+    content: 'stop calling me Shirley'
+  };
+  const edit = synchronizer.clientDiff(doc, shadow);
+  const patchMessage = {
+    msgType: 'patch',
+    id: doc.id,
+    clientId: doc.clientId,
+    edits: [edit]
+  };
+  syncEngine.patch(patchMessage);
+  const patched = syncEngine.getDocument(doc.id);
+  t.equal(patched.content, 'stop calling me Shirley');
+  t.end();
+});
+*/
+test('[server-sync-engine] restore backup', function (t) {
+  const synchronizer = new DiffMatchPatchSynchronizer();
+  const syncEngine = new SyncEngine(synchronizer, new InMemoryDataStore());
+  const clientId = uuid.v4();
+  const doc = {
+    id: '1234',
+    content: 'stop calling me shirley',
+    clientVersion: 2,
+    serverVersion: 2
+  };
+  syncEngine.addDocument(doc, clientId);
+  // simulate inconsistent state, backup still on "old" serverVersion
+  syncEngine.getBackup(doc.id).version = 1;
+  const shadow = {
+    id: doc.id,
+    clientId: doc.clientId,
+    clientVersion: 1,
+    serverVersion: 1,
     content: 'stop calling me Shirley'
   };
   const edit = synchronizer.clientDiff(doc, shadow);
