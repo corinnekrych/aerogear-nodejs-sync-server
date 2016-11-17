@@ -67,6 +67,15 @@ If you are using Node 7.x you can use the `--inspect --debug-brk` command line o
 
     $ npm run lint
 
+### Debugging
+
+#### Enable logging
+Logging can be enable by setting the `NODE_DEBUG` environment variable to the name of the JavaScript source file you want to enable logging for. For example:
+
+    $ env NODE_DEBUG=sync-engine node index.js
+
+Multiple JavaScript files can be added if you are interested in more than one by comma separating them.
+
 If you would like to help develop AeroGear you can join our [developer's mailing list](https://lists.jboss.org/mailman/listinfo/aerogear-dev), join #aerogear on Freenode, or shout at us on Twitter @aerogears.
 
 Also takes some time and skim the [contributor guide](http://aerogear.org/docs/guides/Contributing/)

@@ -1,21 +1,26 @@
 'use strict';
 
-//  const SyncEngine = require('../../lib/sync-engine.js');
-//  const InMemoryDataStore = require('../../lib/datastores/in-memory-store.js');
-//  const DiffMatchPatchSynchronizer = require('../../lib/synchronizers/diff-match-patch.js');
+const InMemoryDataStore = require('../lib/datastores/in-memory-store.js');
+const DiffMatchPatchSynchronizer = require('../lib/synchronizers/diff-match-patch.js');
+const SyncEngine = require('../lib/sync-engine.js');
 const WebSocket = require('ws');
 const ws = new WebSocket('ws://localhost:7777/sync');
 
-//  const syncEngine = new SyncEngine(new DiffMatchPatchSynchronizer(),
-                                  //  new InMemoryDataStore());
+const syncEngine = new SyncEngine(new DiffMatchPatchSynchronizer(),
+                                  new InMemoryDataStore());
 ws.on('open', function open () {
-  const payload = {
+  const seedDoc = {
     id: '1234',
-    clientId: '5678',
-    msgType: 'subscribe',
     content: 1
-  };
-  ws.send(JSON.stringify(payload));
+  }
+  const subscribe = {
+    msgType: 'subscribe',
+    id: seedDoc.id,
+    clientId: '5678',
+    content: seedDoc.content
+  }
+  syncEngine.addDocument(seedDoc, subscribe.clientId);
+  ws.send(JSON.stringify(subscribe));
 });
 
 ws.on('message', function (data, flags) {
@@ -31,15 +36,12 @@ ws.on('message', function (data, flags) {
   switch (json.msgType) {
     case 'patch':
       console.log('Received patchMessage...', json);
-
-      let update = {
-        id: json.id,
-        clientId: json.clientId,
-        msgType: 'patch',
-        content: 2
-      };
-      console.log('send patch', JSON.stringify(update));
-      ws.send(JSON.stringify(update));
+      syncEngine.patch(json);
+      const doc = syncEngine.getDocument(json.id);
+      doc.content += 1;
+      const p = syncEngine.serverDiff(doc, syncEngine.getShadow(doc.id));
+      console.log(p);
+       //ws.send(JSON.stringify(p));
       break;
     case 'error':
       console.log('Error', json.content);

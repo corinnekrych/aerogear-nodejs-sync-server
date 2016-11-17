@@ -53,8 +53,8 @@ test('[sync-handler] messageRecieved: msgType subscribe', function (t) {
     t.equal(json.id, payload.id, 'id\'s should match');
     t.equal(json.clientId, payload.clientId, 'clientId\'s should match');
     t.equal(json.edits.length, 1, 'should be one edit');
-    t.equal(json.edits[0].serverVersion, 0, 'edit serverVersion should be 0');
-    t.equal(json.edits[0].clientVersion, 1, 'edit clientVersion should be 1');
+    t.equal(json.edits[0].serverVersion, 1, 'edit serverVersion should be 0');
+    t.equal(json.edits[0].clientVersion, 0, 'edit clientVersion should be 1');
     t.equal(json.edits[0].checksum, undefined, 'TODO: implement checksum');
     t.equal(json.edits[0].diffs.length, 1, 'edit should contain one diff');
     t.equal(json.edits[0].diffs[0].operation, 'UNCHANGED', 'operation should be UNCHANGED');
@@ -79,8 +79,8 @@ test('[sync-handler] messageRecieved: msgType subscribe object content', functio
     t.equal(json.id, payload.id, 'id\'s should match');
     t.equal(json.clientId, payload.clientId, 'clientId\'s should match');
     t.equal(json.edits.length, 1, 'should be one edit');
-    t.equal(json.edits[0].serverVersion, 0, 'edit serverVersion should be 0');
-    t.equal(json.edits[0].clientVersion, 1, 'edit clientVersion should be 1');
+    t.equal(json.edits[0].serverVersion, 1, 'edit serverVersion should be 0');
+    t.equal(json.edits[0].clientVersion, 0, 'edit clientVersion should be 1');
     t.equal(json.edits[0].checksum, undefined, 'TODO: implement checksum');
     t.equal(json.edits[0].diffs.length, 1, 'edit should contain one diff');
     t.equal(json.edits[0].diffs[0].operation, 'UNCHANGED', 'operation should be UNCHANGED');
@@ -103,8 +103,8 @@ test('[sync-handler] messageRecieved: msgType subscribe array content', function
     t.equal(json.id, payload.id, 'id\'s should match');
     t.equal(json.clientId, payload.clientId, 'clientId\'s should match');
     t.equal(json.edits.length, 1, 'should be one edit');
-    t.equal(json.edits[0].serverVersion, 0, 'edit serverVersion should be 0');
-    t.equal(json.edits[0].clientVersion, 1, 'edit clientVersion should be 1');
+    t.equal(json.edits[0].serverVersion, 1, 'edit serverVersion should be 0');
+    t.equal(json.edits[0].clientVersion, 0, 'edit clientVersion should be 1');
     t.equal(json.edits[0].checksum, undefined, 'TODO: implement checksum');
     t.equal(json.edits[0].diffs.length, 1, 'edit should contain one diff');
     t.equal(json.edits[0].diffs[0].operation, 'UNCHANGED', 'operation should be UNCHANGED');
@@ -122,7 +122,7 @@ test('[sync-handler] clientClosed', function (t) {
   };
   const handler = new SyncHandler(createSyncEngine());
   handler.on('subscriberDeleted', function (subscriber) {
-    t.equal(subscriber.docId, payload.id, 'document id should match');
+    t.equal(subscriber.id, payload.id, 'document id should match');
     t.equal(subscriber.clientId, payload.clientId, 'client id should match');
     t.ok(subscriber.client, 'client should exist');
     t.end();
@@ -130,7 +130,7 @@ test('[sync-handler] clientClosed', function (t) {
   handler.on('subscriberAdded', function (patchMessage) {
     const json = JSON.parse(patchMessage);
     const subscriber = {
-      docId: json.id,
+      id: json.id,
       clientId: json.clientId,
       client: {}
     };
@@ -148,7 +148,7 @@ test('[sync-handler] detach', function (t) {
   };
   const handler = new SyncHandler(createSyncEngine());
   handler.on('detached', function (subscriber) {
-    t.equal(subscriber.docId, payload.id, 'document id should match');
+    t.equal(subscriber.id, payload.id, 'document id should match');
     t.equal(subscriber.clientId, payload.clientId, 'client id should match');
     t.ok(subscriber.client, 'client should exist');
     t.end();
@@ -156,12 +156,12 @@ test('[sync-handler] detach', function (t) {
   handler.on('subscriberAdded', function (patchMessage) {
     const json = JSON.parse(patchMessage);
     const detach = {
-      docId: json.id,
+      id: json.id,
       clientId: json.clientId,
       msgType: 'detach'
     };
     const subscriber = {
-      docId: json.id,
+      id: json.id,
       clientId: json.clientId,
       client: {}
     };
@@ -201,6 +201,10 @@ test('[sync-handler] patch', function (t) {
     handler.messageReceived(JSON.stringify(patch), {});
 
     t.end();
+  });
+  handler.on('patched', function (patchMessage, subscriber) {
+    t.equal(subscriber.id, payload.id, 'document id should match');
+    t.equal(subscriber.clientId, payload.clientId, 'client id should match');
   });
   handler.messageReceived(JSON.stringify(payload), {});
 });

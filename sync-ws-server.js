@@ -3,6 +3,9 @@
 */
 'use strict';
 
+const util = require('util');
+const debuglog = util.debuglog('sync-ws-server');
+
 const WebSocketServer = require('ws').Server;
 const express = require('express');
 const app = express();
@@ -25,43 +28,41 @@ syncHandler.messageReceived.bind(syncHandler);
 syncHandler.clientClosed.bind(syncHandler);
 
 syncHandler.on('subscriberAdded', function (patchMessage, subscriber) {
-  console.log('subscriber added.');
+  debuglog('subscriber', subscriber.clientId, 'added for doc', subscriber.id);
   // store the subscriber with the current socket
   subscriber.client.subscriber = subscriber;
   subscriber.client.send(patchMessage);
 });
 
-syncHandler.on('patched', function (patchMessage, subscribers) {
-  console.log('patch: notify all active subscribers');
-  subscribers.forEach(function (subscriber) {
-    subscriber.client.send(patchMessage);
-  });
+syncHandler.on('patched', function (patchMessage, subscriber) {
+  debuglog('patch: notify active subscriber');
+  subscriber.client.send(patchMessage);
 });
 
 syncHandler.on('detached', function (message, client) {
-  console.log('detached: close websocket');
+  debuglog('detached: close websocket');
   client.close();
 });
 
 syncHandler.on('error', function (errorMsg, client) {
-  console.log('error: ', errorMsg);
+  debuglog('error: ', errorMsg);
   client.send(errorMsg);
 });
 
 ws.on('connection', function (socket) {
-  console.log('Client Connected');
+  debuglog('Client Connected');
 
   socket.on('message', function (message) {
     syncHandler.messageReceived(message, socket);
   });
 
   socket.on('close', function () {
-    console.log('Closing client connection');
+    debuglog('Closing client connection');
     syncHandler.clientClosed(socket.subscriber);
   });
 });
 
 ws.on('error', function (error) {
-  console.log('WS Server error', error);
+  debuglog('WS Server error', error);
 });
 
