@@ -14,6 +14,14 @@ test('[server-sync-engine] create new SyncEngine', function (t) {
   t.end();
 });
 
+test('[server-sync-engine] create SyncEngine without new', function (t) {
+  const synchronizer = new DiffMatchPatchSynchronizer();
+  const datastore = new InMemoryDataStore();
+  const syncEngine = SyncEngine(synchronizer, datastore);
+  t.ok(syncEngine instanceof SyncEngine, 'should be instance of SyncEngine');
+  t.end();
+});
+
 test('[server-sync-engine] addDocument empty content', function (t) {
   const syncEngine = new SyncEngine(new DiffMatchPatchSynchronizer(),
                                     new InMemoryDataStore());
@@ -158,6 +166,35 @@ test('[server-sync-engine] diff', function (t) {
 });
 
 test('[server-sync-engine] patch', function (t) {
+  const synchronizer = new DiffMatchPatchSynchronizer();
+  const syncEngine = new SyncEngine(synchronizer, new InMemoryDataStore());
+  const clientId = uuid.v4();
+  const doc = {
+    id: '1234',
+    content: 'stop calling me shirley'
+  };
+  syncEngine.addDocument(doc, clientId);
+  const shadow = {
+    id: doc.id,
+    clientId: doc.clientId,
+    clientVersion: 0,
+    serverVersion: 0,
+    content: 'stop calling me Shirley'
+  };
+  const edit = synchronizer.clientDiff(doc, shadow);
+  const patchMessage = {
+    msgType: 'patch',
+    id: doc.id,
+    clientId: doc.clientId,
+    edits: [edit]
+  };
+  syncEngine.patch(patchMessage);
+  const patched = syncEngine.getDocument(doc.id);
+  t.equal(patched.content, 'stop calling me Shirley');
+  t.end();
+});
+
+test('[server-sync-engine] patch but server already has the client version', function (t) {
   const synchronizer = new DiffMatchPatchSynchronizer();
   const syncEngine = new SyncEngine(synchronizer, new InMemoryDataStore());
   const clientId = uuid.v4();
